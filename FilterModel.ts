@@ -1,12 +1,12 @@
-import {Item} from '../definitions';
+
 
 export class Node {
   Left: Node;
   Right: Node;
   expression: BooleanExpression;
-  method: any;
+  method: object;
 
-  constructor(lft: Node, rght: Node, exp: BooleanExpression, meth: any) {
+  constructor(lft: Node, rght: Node, exp: BooleanExpression, meth: object) {
     this.expression = exp;
     this.Left = lft;
     this.Right = rght;
@@ -20,7 +20,7 @@ export function join(list1: Item[], list2: Item[]) {
 }
 
 
-export  function cross(list1: Item[], list2: Item[]) {
+export function cross(list1: Item[], list2: Item[]) {
   return list1.filter(element => list2.includes(element));
 }
 
@@ -28,7 +28,7 @@ export class NodeBuilder {
   Left: Node = null;
   Right: Node = null;
   expression: BooleanExpression = null;
-  method?: any = null;
+  method?: object = null;
 
   setLeft(lft: Node) {
     this.Left = lft;
@@ -45,7 +45,7 @@ export class NodeBuilder {
     return this;
   }
 
-  setMethod(meth: number) {
+  setMethod(meth: object) {
     this.method = meth;
     return this;
   }
@@ -56,48 +56,52 @@ export class NodeBuilder {
 
 }
 
+// Expression class Implementation
+
 export class BooleanExpression {
-  leftOp: any;
-  rightOp: any;
-  linkMethod: any;
+  leftOp: number | string;
+  rightOp: number | string;
+  linkMethod: object;
+  result: object;
+
+  constructor(lft: number | string, rght: number | string, linkMeth: object, res: object) {
+    this.leftOp = lft;
+    this.rightOp = rght;
+    this.linkMethod = linkMeth;
+    this.result = res;
+  }
 }
 
 
 export class GreaterThan extends BooleanExpression {
-
-  linkMethod: any;
-  leftOp: any;
-  rightOp: any;
-
-  result() {
-    return this.leftOp > this.rightOp;
+  constructor(lft: number | string, rght: number | string, linkMeth: object) {
+    super(lft, rght, linkMeth, () => {
+      return this.leftOp > this.rightOp;
+    });
   }
 }
 
 
 export class SmallerThan extends BooleanExpression {
-
-  linkMethod: any;
-  leftOp: any;
-  rightOp: any;
-
-  result() {
-    return this.leftOp < this.rightOp;
+  constructor(lft: number | string, rght: number | string, linkMeth: object) {
+    super(lft, rght, linkMeth, () => {
+      return this.leftOp < this.rightOp;
+    });
   }
 }
 
 
 export class Equal extends BooleanExpression {
-
-  linkMethod: any;
-  leftOp: any;
-  rightOp: any;
-
-  result() {
-    return this.leftOp == this.rightOp;
+  constructor(lft: number | string, rght: number | string, linkMeth: object) {
+    super(lft, rght, linkMeth, () => {
+      // tslint:disable-next-line:triple-equals
+      return this.leftOp == this.rightOp;
+    });
   }
 }
 
+
+// Filter Model with Filter model builder
 
 export class FilerModelBuilder {
   expressions: BooleanExpression[] = [];
@@ -128,9 +132,6 @@ export class FilterModel {
       const tmp = (new NodeBuilder().setMethod(exp.linkMethod).setLeft(this.tree).setRight(new NodeBuilder().setExpression(exp).build())).build();
       this.tree = tmp;
       this.tree.method = tmp.method;
-
-
     }
   }
-
 }
